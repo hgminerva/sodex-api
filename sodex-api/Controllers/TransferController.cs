@@ -4,9 +4,11 @@ using CSharp2nem.Model.DataModels;
 using CSharp2nem.RequestClients;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http;
 using static CSharp2nem.ResponseObjects.Mosaic.MosaicDefinition;
 
@@ -17,7 +19,7 @@ namespace sodex_api.Controllers
         [HttpPost, Route("Send")]
         public String Transaction(Models.TransferData data)
         {
-            String message = " ";
+            String message = "";
             List<CSharp2nem.Model.Transfer.Mosaics.Mosaic> MosaicList = new List<CSharp2nem.Model.Transfer.Mosaics.Mosaic>();
             var connection = new Connection();
             connection.SetTestnet();
@@ -28,7 +30,7 @@ namespace sodex_api.Controllers
 
             foreach (var mosaic in mosaicResponse.Data)
             {
-                if (mosaic.MosaicId.Name != "xem")
+                if (mosaic.MosaicId.Name == "tfc")
                 {
                     MosaicList.Add(new CSharp2nem.Model.Transfer.Mosaics.Mosaic(mosaic.MosaicId.NamespaceId, mosaic.MosaicId.Name, (data.Amount * 10000)));
                 }
@@ -52,6 +54,7 @@ namespace sodex_api.Controllers
                     {
                         if (body.Ex != null) throw body.Ex;
                         message = body.Content.Message;
+                        Debug.WriteLine(message);
                     }
                     catch (Exception e)
                     {
@@ -63,6 +66,7 @@ namespace sodex_api.Controllers
             {
                 message = e.Message;
             }
+            Thread.Sleep(5000); //to make sure the message variable gets the content message before terminating
             return message;
         }
     }
